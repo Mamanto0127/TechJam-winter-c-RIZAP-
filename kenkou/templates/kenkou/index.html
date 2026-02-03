@@ -4,6 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <button onclick="getLocation()">現在地を取得</button>
+
+<script>
+function getLocation() {
+  if (!navigator.geolocation) {
+    alert("このブラウザは位置情報に対応していません");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const time = Date.now();
+
+      console.log("現在地:", lat, lon);
+
+      sendToServer(lat, lon, time);
+    },
+    function(err) {
+      alert("位置情報の取得に失敗しました");
+      console.error(err);
+    }
+  );
+}
+
+function sendToServer(lat, lon, time) {
+  fetch("{% url 'kenkou:location_receive' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": "{{ csrf_token }}"
+    },
+    body: JSON.stringify({
+      latitude: lat,
+      longitude: lon,
+      timestamp: time
+    })
+  });
+}
+</script>
 </head>
 <body>
     <p>aaaaaa</p>
