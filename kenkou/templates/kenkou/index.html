@@ -1,53 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <button onclick="getLocation()">現在地を取得</button>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現在地取得</title>
+</head>
 
-<script>
-function getLocation() {
-  if (!navigator.geolocation) {
-    alert("このブラウザは位置情報に対応していません");
-    return;
+<body>
+  <button onclick="getLocation()">現在地を取得</button>
+
+  <p id="location">まだ取得していません</p>
+
+  <script>
+  function getLocation() {
+    if (!navigator.geolocation) {
+      alert("このブラウザは位置情報に対応していません");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const time = Date.now();
+
+        // 👇 画面に表示
+        document.getElementById("location").innerText =
+          `緯度: ${lat}, 経度: ${lon}`;
+
+        // Djangoへ送信
+        sendToServer(lat, lon, time);
+      },
+      function(err) {
+        document.getElementById("location").innerText =
+          "位置情報の取得に失敗しました";
+        console.error(err);
+      }
+    );
   }
 
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      const time = Date.now();
-
-      console.log("現在地:", lat, lon);
-
-      sendToServer(lat, lon, time);
-    },
-    function(err) {
-      alert("位置情報の取得に失敗しました");
-      console.error(err);
-    }
-  );
-}
-
-function sendToServer(lat, lon, time) {
-  fetch("{% url 'kenkou:location_receive' %}", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": "{{ csrf_token }}"
-    },
-    body: JSON.stringify({
-      latitude: lat,
-      longitude: lon,
-      timestamp: time
-    })
-  });
-}
-</script>
-</head>
-<body>
-    <p>aaaaaa</p>
-    <p>{{response}}</p>
+  function sendToServer(lat, lon, time) {
+    fetch("{% url 'kenkou:location_receive' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+        latitude: lat,
+        longitude: lon,
+        timestamp: time
+      })
+    });
+  }
+  </script>
 </body>
 </html>
