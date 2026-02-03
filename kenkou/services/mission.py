@@ -1,10 +1,6 @@
 import random
 from kenkou.models import Mission
 
-def get_today_missions(count=1):
-    missions = list(Mission.objects.all())
-    return random.sample(missions, count)
-
 AI_missions = [
     {
         "title": "「忍び足」階段登り", 
@@ -66,7 +62,23 @@ AI_missions = [
         "description": "布団の中で足の指を思い切り「ぐー」で縮め、「パー」で開きます。現代人は足指が固まりがちなので、これで愛の疲れが取れやすくなります。", 
         "reward_damage": 15, 
     }, 
-    {
-        
-    }
 ]
+
+def save_ai_missions():
+    """AIが考えたミッションをDBに保存"""
+    for m in AI_missions:
+        Mission.objects.get_or_create(
+            title=m["title"],
+            defaults={
+                "description": m["description"],
+                "reward_damage": m["reward_damage"],
+            }
+        )
+
+def get_today_missions(count=3):
+    missions = list(Mission.objects.all())
+
+    if not missions:
+        return []
+    
+    return random.sample(missions, min(count, len(missions)))

@@ -1,25 +1,26 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.http import JsonResponse
-import json
 from datetime import date
 from .models import WalkLog, Enemy
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
+from datetime import datetime
 from .services.battle import calculate_damage, attack_enemy
 from .services.mission import get_today_missions
 
-def location_receive(request):  #位置情報
+@csrf_exempt
+def location_receive(request):
     if request.method == "POST":
         data = json.loads(request.body)
 
-        lat = data.get("latitude")
-        lon = data.get("longitude")
-        time = data.get("timestamp")
+        lat = data["latitude"]
+        lon = data["longitude"]
+        time = datetime.fromtimestamp(data["timestamp"] / 1000)
 
-        print("受信した現在地:", lat, lon, time)
+        print(lat, lon, time)
 
         return JsonResponse({"status": "ok"})
-
-    return JsonResponse({"status": "ng"}, status=400)
 
 def index(request):
     return render(request, 'kenkou/index.html')

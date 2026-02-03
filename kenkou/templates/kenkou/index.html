@@ -9,57 +9,75 @@
 <body>
 
   <ul>
-    <!-- <li><a href="{% url 'kenkou:log' %}"> ログを見る</a></li> -->
     <li><a href="{% url 'kenkou:mission' %}"> ミッション</a></li>
     <li><a href="{% url 'kenkou:battle' %}"> たたかう</a></li>
   </ul>
 
-  <button onclick="getLocation()">現在地を取得</button>
+  <button onclick="startTracking()">かいし</button>
+  <button onclick = "stopTracking()">終わり</button>
 
-  <p id="location">まだ取得していません</p>
+  <div id="log"></div>
 
-  <script>
-  function getLocation() {
+<script>
+let watchId = null;
+
+function startTracking() {
     if (!navigator.geolocation) {
-      alert("このブラウザは位置情報に対応していません");
-      return;
+        alert("位置情報が使えません");
+        return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      function(pos) {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        const time = Date.now();
-
-        // 👇 画面に表示
-        document.getElementById("location").innerText =
-          `緯度: ${lat}, 経度: ${lon}`;
-
-        // Djangoへ送信
-        sendToServer(lat, lon, time);
-      },
-      function(err) {
-        document.getElementById("location").innerText =
-          "位置情報の取得に失敗しました";
-        console.error(err);
-      }
+    watchId = navigator.geolocation.watchPosition(
+        positionSuccess,
+        positionError,
+        {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
     );
-  }
+}
 
-  function sendToServer(lat, lon, time) {
+function stopTracking() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+}
+
+function positionSuccess(pos) {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const acc = pos.coords.accuracy;
+    const time = Date.now();
+
+    // 精度が悪いものは捨てる（重要）
+    if (acc > 20) return;
+
+    document.getElementById("log").innerHTML =
+        `緯度:${lat}<br>経度:${lon}<br>精度:${acc}m`;
+
+    sendLocation(lat, lon, time);
+}
+
+function positionError(err) {
+    console.log(err);
+}
+
+function sendLocation(lat, lon, time) {
     fetch("{% url 'kenkou:location_receive' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}"
-      },
-      body: JSON.stringify({
-        latitude: lat,
-        longitude: lon,
-        timestamp: time
-      })
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            latitude: lat,
+            longitude: lon,
+            timestamp: time
+        })
     });
-  }
-  </script>
+}
+</script>
 </body>
 </html>
