@@ -7,6 +7,13 @@
 </head>
 
 <body>
+
+  <ul>
+    <!-- <li><a href="{% url 'kenkou:log' %}"> ログを見る</a></li> -->
+    <li><a href="{% url 'kenkou:mission' %}"> ミッション</a></li>
+    <li><a href="{% url 'kenkou:battle' %}"> たたかう</a></li>
+  </ul>
+
   <button onclick="getLocation()">現在地を取得</button>
 
   <p id="location">まだ取得していません</p>
