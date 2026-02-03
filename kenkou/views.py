@@ -36,4 +36,4 @@ def battle_view(request):
     damage = calculate_damage(walklog.steps)
     attack_enemy(enemy, damage)
 
-    return render(request, "kenkou/battle.html", {"damege": damage, "enemy": enemy})
+    return render(request, "kenkou/battle.html", {"damage": damage, "enemy": enemy})

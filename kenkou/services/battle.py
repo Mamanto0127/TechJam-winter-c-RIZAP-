@@ -1,4 +1,4 @@
-def calulate_damage(steps):
+def calculate_damage(steps):
     return steps // 100
 
 def attack_enemy(enemy, damage):

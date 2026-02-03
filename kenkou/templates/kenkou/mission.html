@@ -1,0 +1,9 @@
+<h2>mission</h2>
+
+{% for mission in missions %}
+<div>
+    <h3>{{ mission.title }}</h3>
+    <p>{{ mission.description }}</p>
+    <p>ダメージ：{{ mission.reward_damage }}</p>
+</div>
+{% endfor %}
