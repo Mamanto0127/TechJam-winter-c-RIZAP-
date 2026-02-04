@@ -63,7 +63,11 @@ AI_missions = [
         "description": "布団の中で足の指を思い切り「ぐー」で縮め、「パー」で開きます。現代人は足指が固まりがちなので、これで愛の疲れが取れやすくなります。", 
         "reward_damage": 15, 
     }, 
-
+    {
+        "title": "3つの感謝", 
+        "description": "目をつぶって今日あった「良かったこと」を3つだけ思い出します。「コーヒーが美味しかった」レベルでオッケーです。脳がポジティブな状態で入眠できます。", 
+        "reward_damage": 20,
+    }
 ]
 
 def save_ai_missions():
@@ -76,6 +80,8 @@ def save_ai_missions():
                 "reward_damage": m["reward_damage"],
             }
         )
+
+from datetime import date
 
 def get_today_missions(count=3):
     missions = list(Mission.objects.all())
