@@ -5,6 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>現在地取得</title>
+    <style>
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            height: 20px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            transition: width 0.3s ease;
+        }
+        </style>
+        
 </head>
 
 <body>
@@ -34,6 +53,11 @@
         進捗：0 %
     </p>
 
+    <div class="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    
+
     <script>
         let watchId = null;
         let lastLat = null;
@@ -57,18 +81,23 @@
 
         // ====== 表示更新 ======
         function updateView() {
-            document.getElementById("distance").textContent =
-                `今日の合計距離: ${totalDistance.toFixed(2)} m`;
+    // 合計距離
+    document.getElementById("distance").textContent =
+        `今日の合計距離: ${totalDistance.toFixed(2)} m`;
 
-            let percent = 0;
-            if (goalDistance > 0) {
-                percent = Math.min((totalDistance / goalDistance) * 100, 100);
-            }
+    let percent = 0;
+    if (goalDistance > 0) {
+        percent = Math.min((totalDistance / goalDistance) * 100, 100);
+    }
 
-            document.getElementById("progress").textContent =
-                `進捗：${percent.toFixed(1)} %`;
-        }
+    // % 表示
+    document.getElementById("progress").textContent =
+        `進捗：${percent.toFixed(1)} %`;
 
+    // グラフ（バー）
+    document.getElementById("progress-bar").style.width =
+        `${percent}%`;
+}
         // ====== GPS成功 ======
         function positionSuccess(pos) {
             const { latitude: lat, longitude: lon, accuracy: acc } = pos.coords;
