@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>進捗</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'top.css' %}">
     <style>
         .progress-chart {
             width: 140px;
@@ -146,7 +148,19 @@ document.getElementById("goal-form").addEventListener("submit", e => {
 /* 初期化 */
 updateProgress();
 window.onload = startTracking;
+
+
+
+
+
 </script>
+
+
 
 </body>
 </html>
+
+
+
+
+
