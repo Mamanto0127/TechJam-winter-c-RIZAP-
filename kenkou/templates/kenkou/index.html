@@ -14,45 +14,37 @@
         <li><a href="{% url 'kenkou:battle' %}"> たたかう</a></li>
     </ul>
 
+    <form id="goal-form">
+        <label>
+            今日の目標距離（m）：
+            <input type="number" id="goalDistance" min="1" step="1" placeholder="例：1500" required>
+        </label>
+        <button type="submit">設定</button>
+    </form>
+
+    <p id="goal">
+        今日の目標：{{ goal_distance }} m
+    </p>
+
     <p id="distance">
         今日の合計距離: {{ total_distance }} m
     </p>
 
+    <p id="progress">
+        進捗：0 %
+    </p>
 
     <script>
         let watchId = null;
         let lastLat = null;
         let lastLon = null;
 
-        function getTodayKey() {
-            return new Date().toISOString().slice(0, 10);
-        }
-
-        // 🔵 Django → 初期値
         let totalDistance = {{ total_distance }};
-
-        // 🔵 localStorage 優先
-        const todayKey = getTodayKey();
-        const storedDate = localStorage.getItem("distanceDate");
-        const storedDistance = parseFloat(localStorage.getItem("totalDistance"));
-
-        if (storedDate === todayKey && !isNaN(storedDistance)) {
-            totalDistance = storedDistance;
-        } else {
-            localStorage.setItem("totalDistance", totalDistance);
-            localStorage.setItem("distanceDate", todayKey);
-        }
-
-        function updateView() {
-            document.getElementById("distance").textContent =
-                `今日の合計距離: ${totalDistance.toFixed(2)} m`;
-        }
-
-        updateView();
-
+        let goalDistance = {{ goal_distance|default:"0" }};
+        // ====== 位置情報開始 ======
         function startTracking() {
             if (!navigator.geolocation) {
-                console.warn("Geolocation not supported");
+                alert("位置情報が使えません");
                 return;
             }
 
@@ -63,24 +55,45 @@
             );
         }
 
+        // ====== 表示更新 ======
+        function updateView() {
+            document.getElementById("distance").textContent =
+                `今日の合計距離: ${totalDistance.toFixed(2)} m`;
+
+            let percent = 0;
+            if (goalDistance > 0) {
+                percent = Math.min((totalDistance / goalDistance) * 100, 100);
+            }
+
+            document.getElementById("progress").textContent =
+                `進捗：${percent.toFixed(1)} %`;
+        }
+
+        // ====== GPS成功 ======
         function positionSuccess(pos) {
             const { latitude: lat, longitude: lon, accuracy: acc } = pos.coords;
-            if (acc > 20) return;
+            if (acc > 80) return;
 
-            if (lastLat !== null && lastLon !== null) {
-                const dist = haversineDistance(lastLat, lastLon, lat, lon);
-                if (dist < 5) return;
-
-                totalDistance += dist;
-                localStorage.setItem("totalDistance", totalDistance);
-                updateView();
-                sendDistanceToServer(totalDistance);
+            if (lastLat === null || lastLon === null) {
+                lastLat = lat;
+                lastLon = lon;
+                return;
             }
+
+            const dist = haversineDistance(lastLat, lastLon, lat, lon);
+            if (dist < 1) return;
+
+            totalDistance += dist;
+            localStorage.setItem("totalDistance", totalDistance);
+
+            updateView();
+            sendDistanceToServer(totalDistance);
 
             lastLat = lat;
             lastLon = lon;
         }
 
+        // ====== 距離計算 ======
         function haversineDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const toRad = x => x * Math.PI / 180;
@@ -94,6 +107,7 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
+        // ====== サーバ送信 ======
         function sendDistanceToServer(distance) {
             fetch("{% url 'kenkou:location_receive' %}", {
                 method: "POST",
@@ -105,8 +119,41 @@
             });
         }
 
+        // ====== 目標設定 ======
+        document.getElementById("goal-form").addEventListener("submit", e => {
+            e.preventDefault();
+
+            const goalInput = document.getElementById("goalDistance");
+            const goal = parseInt(goalInput.value);
+
+            if (isNaN(goal) || goal <= 0) {
+                alert("正しい目標距離を入力してください");
+                return;
+            }
+
+            fetch("{% url 'kenkou:set_goal' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ goal })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    goalDistance = data.goal;
+                    document.getElementById("goal").textContent =
+                        `今日の目標：${data.goal} m`;
+                    updateView();
+                    goalInput.value = "";
+                });
+        });
+
+        // 初期化
+        updateView();
         window.onload = startTracking;
     </script>
+
 
 
 

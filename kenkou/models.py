@@ -6,6 +6,7 @@ class WalkLog(models.Model):  #歩いた歩数を記録するデータベース�
     date = models.DateField()  #いつの記録なのかを保存     6500歩 → 65ダメージ　※参考
     steps = models.IntegerField()  #その日に歩いた歩数を保存
     distance = models.FloatField()   #歩いた距離を保存
+    
 
 class Enemy(models.Model):   #敵を作るための宣下
     max_hp = models.IntegerField() #敵のHPを保存
