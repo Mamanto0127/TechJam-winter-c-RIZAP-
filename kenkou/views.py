@@ -98,3 +98,6 @@ def battle_view(request):
 
     return render(request, "kenkou/battle.html", {"damage": damage, "enemy": enemy})
 
+
+def logs_view(request):
+    return render(request, "kenkou/logs.html")

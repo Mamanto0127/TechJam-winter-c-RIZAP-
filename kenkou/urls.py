@@ -9,4 +9,5 @@ urlpatterns = [
   path("mission/", views.mission_view, name="mission"), 
   path("battle/", views.battle_view, name="battle"),
   path("set_goal/", views.set_goal_distance, name="set_goal"),
+  path("logs/", views.logs_view, name="logs")
 ]
