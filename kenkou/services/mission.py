@@ -98,4 +98,3 @@ def get_today_missions(count=3):
     # シードを戻して他のランダム処理に影響を与えないようにする
     random.seed()
     return selected
-
