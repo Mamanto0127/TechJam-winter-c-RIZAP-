@@ -62,6 +62,7 @@ AI_missions = [
         "description": "布団の中で足の指を思い切り「ぐー」で縮め、「パー」で開きます。現代人は足指が固まりがちなので、これで愛の疲れが取れやすくなります。", 
         "reward_damage": 15, 
     }, 
+
 ]
 
 def save_ai_missions():
@@ -81,4 +82,4 @@ def get_today_missions(count=3):
     if not missions:
         return []
     
-    return random.sample(missions, min(count, len(missions)))
+

@@ -8,6 +8,11 @@ from django.http import JsonResponse
 from datetime import datetime
 from .services.battle import calculate_damage, attack_enemy
 from .services.mission import get_today_missions
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
+from datetime import datetime
+
 
 @csrf_exempt
 def location_receive(request):
@@ -38,3 +43,16 @@ def battle_view(request):
     attack_enemy(enemy, damage)
 
     return render(request, "kenkou/battle.html", {"damage": damage, "enemy": enemy})
+
+@csrf_exempt
+def location_receive(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        lat = data["latitude"]
+        lon = data["longitude"]
+        time = datetime.fromtimestamp(data["timestamp"] / 1000)
+
+        print(lat, lon, time)
+
+        return JsonResponse({"status": "ok"})
