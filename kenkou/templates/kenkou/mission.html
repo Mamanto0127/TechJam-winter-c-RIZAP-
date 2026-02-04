@@ -1,13 +1,205 @@
-<h2>mission</h2>
+<body style="margin:0; background-color:black;">
 
-{% for mission in missions %}
-<div>
-    <h3>{{ mission.title }}</h3>
-    <p>{{ mission.description }}</p>
-    <p>ダメージ：{{ mission.reward_damage }}</p>
+<div style="
+  width: 440px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: sans-serif;
+  overflow-x: hidden;
+">
+
+  <!-- ヘッダー -->
+  <div style="
+    background-color: #2B5F75;
+    color: #ffffff;
+    padding: 14px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 0 0 12px 12px;
+  ">
+    <a href="{% url 'kenkou:index' %}" style="
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      float: left;
+    ">
+      ← 戻る
+    </a>
+    ミッション
+  </div>
+
+  <!-- タブ -->
+  <div style="display: flex; margin: 16px 20px 0;">
+    <div style="
+      flex: 1;
+      background-color: #4EA4C8;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px 12px 0 0;
+      font-weight: bold;
+    ">
+      デイリー
+    </div>
+    <div style="
+      flex: 1;
+      background-color: #1f4f63;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px 12px 0 0;
+      font-weight: bold;
+      margin-left: 6px;
+    ">
+      ウィークリー
+    </div>
+  </div>
+
+  <!-- ミッション一覧 -->
+  <div style="
+    background-color: #4EA4C8;
+    margin: 0 20px;
+    padding: 16px;
+    border-radius: 0 12px 12px 12px;
+  ">
+    {% for mission in missions %}
+    <div style="
+    background-color: #5BB0D1;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  ">
+
+    <!-- タイトル -->
+    <div style="
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    ">
+      {{ mission.title }}
+    </div>
+
+    <!-- 説明 -->
+    <div style="
+  color: #eaf6fb;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  word-break: break-word;
+">
+  {{ mission.description }}
 </div>
-{% endfor %}
 
-<button>
-    <a href="{% url 'kenkou:index' %}"> トップページ</a>
-</button>
+    <!-- プログレスバー -->
+    <div style="
+      width: 100%;
+      height: 8px;
+      background-color: #3a7f9a;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    ">
+      <div style="
+        width: {{ mission.progress|default:0 }}%;
+        height: 100%;
+        background-color: #1fc77a;
+        border-radius: 4px;
+      "></div>
+    </div>
+
+    <!-- ダメージ -->
+    <div style="
+      color: white;
+      font-size: 12px;
+      text-align: right;
+      opacity: 0.9;
+    ">
+      ダメージ：{{ mission.reward_damage }}
+    </div>
+
+  </div>
+    {% endfor %}
+  </div>
+
+  <!-- 下ナビゲーション -->
+<div style="
+position: fixed;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 440px;
+background-color: #2B5F75;
+border-radius: 16px 16px 0 0;
+padding: 10px 0;
+display: flex;
+justify-content: space-around;
+z-index: 1000;
+">
+
+<!-- ミッション -->
+<a href="{% url 'kenkou:mission' %}" style="
+  text-decoration: none;
+  color: #2fdc9f;
+  font-size: 12px;
+  text-align: center;
+">
+  <div style="
+    width: 36px;
+    height: 36px;
+    background-color: #2fdc9f;
+    border-radius: 50%;
+    margin: 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2B5F75;
+    font-weight: bold;
+  ">?</div>
+  ミッション
+</a>
+
+<!-- たたかう -->
+<a href="{% url 'kenkou:battle' %}" style="
+  text-decoration: none;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+">
+  <div style="
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  ">🤺</div>
+  たたかう
+</a>
+
+<!-- ログ -->
+<a href="#" style="
+  text-decoration: none;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+">
+  <div style="
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  ">📄</div>
+  ログ
+</a>
+
+</div>
+
+</div>
+
+</body>
