@@ -84,17 +84,16 @@ def save_ai_missions():
 from datetime import date
 
 def get_today_missions(count=3):
+    save_ai_missions()  # ← ★これを追加
+
     missions = list(Mission.objects.all())
     if not missions:
         return []
 
-    # 日付ベースでシードを固定
     today = date.today()
-    seed = int(today.strftime("%Y%m%d"))  # 例: 20260204
+    seed = int(today.strftime("%Y%m%d"))
     random.seed(seed)
 
     selected = random.sample(missions, min(count, len(missions)))
-
-    # シードを戻して他のランダム処理に影響を与えないようにする
     random.seed()
     return selected
