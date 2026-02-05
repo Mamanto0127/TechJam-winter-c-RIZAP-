@@ -8,6 +8,9 @@ from django.http import JsonResponse
 from datetime import datetime
 from .services.battle import calculate_damage, attack_enemy
 from .services.mission import get_today_missions
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 
 @csrf_exempt
 def location_receive(request):
@@ -23,7 +26,7 @@ def location_receive(request):
                 user=request.user,
                 date=today
             )
-            walklog.total_distance = distance
+            walklog.distance = distance
             walklog.save()
 
         # 🔵 ログインしていない場合 → セッション保存
@@ -65,7 +68,7 @@ def index(request):
             user=request.user,
             date=today
         )
-        total_distance = walklog.total_distance or 0.0
+        total_distance = walklog.distance or 0.0
 
     # ===== セッションから goal 読み出し（共通）=====
     if request.session.get("goal_date") == today.isoformat():
@@ -88,16 +91,45 @@ def mission_view(request):
     missions = get_today_missions(count=3)
     return render(request, "kenkou/mission.html", {"missions": missions})
 
+@login_required
 def battle_view(request):
     today = date.today()
-    walklog = WalkLog.objects.get(user=request.user, date=today)
-    enemy = Enemy.objects.first()
 
-    damage = calculate_damage(walklog.steps)
-    attack_enemy(enemy, damage)
+    if not request.user.is_authenticated:
+        return redirect("login")
+    
+    #ユーザのログ取得
+    walklog, created = WalkLog.objects.get_or_create(
+        user=request.user,
+        date=today,
+        defaults={"steps": 0, "distance": 0}
+    )    
 
-    return render(request, "kenkou/battle.html", {"damage": damage, "enemy": enemy})
+    #敵
+    enemy, created = Enemy.objects.get_or_create(
+        id=1, 
+        defaults={"max_hp": 100, "current_hp": 100}
+    )
 
+    damage = 0
+    if request.method == "POST":
+        distance_damage = int (walklog.distance / 100)   #100メートルにつき1ダメージ
+
+        mission_damage = request.session.get("mission_damage", 0) #ミッションクリアでダメージ
+
+        damage = distance_damage + mission_damage
+
+        enemy.current_hp = max(enemy.current_hp - damage, 0) #攻撃
+        enemy.save()
+
+        request.session["mission_damage"] = 0
+
+    hp_percent = int(enemy.current_hp / enemy.max_hp * 100)
+
+    return render(request, "kenkou/battle.html", {
+        "damage": damage, 
+        "enemy": enemy, 
+        "hp_percent": hp_percent})
 
 def logs_view(request):
     return render(request, "kenkou/logs.html")

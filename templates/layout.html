@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+</head>
+<body>
+
+    <nav>
+    <div>
+      <a href='{% url "kenkou:index" %}'>ホーム</a>
+     <ul>
+      {% if user.is_authenticated %}
+          <li>
+              <span>{{ user }} - </span>
+          </li>
+        <li>
+          <form action="{% url 'logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link nav-link logout">Logout</button>
+          </form>
+        </li>
+        {% else %}
+        <a href='{% url "login" %}' class='login nav-link'>Login</a>
+      {% endif %}
+  </ul>
+    </div>
+  </nav>
+    
+</body>
+</html>

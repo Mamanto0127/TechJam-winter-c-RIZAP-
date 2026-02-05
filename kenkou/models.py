@@ -4,8 +4,11 @@ from django.contrib.auth.models import User
 class WalkLog(models.Model):  #歩いた歩数を記録するデータベースを作る宣言
     user = models.ForeignKey(User, on_delete=models.CASCADE)   #どのユーザの歩数記録かを保存
     date = models.DateField()  #いつの記録なのかを保存     6500歩 → 65ダメージ　※参考
-    steps = models.IntegerField()  #その日に歩いた歩数を保存
-    distance = models.FloatField()   #歩いた距離を保存
+    steps = models.IntegerField(default=0)
+    distance = models.FloatField(default=0.0)   #歩いた距離を保存
+
+    class Meta:
+        unique_together = ("user", "date")
     
 
 class Enemy(models.Model):   #敵を作るための宣下
