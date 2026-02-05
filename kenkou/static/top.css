@@ -1,135 +1,238 @@
-/* 全体のリセットと背景 */
-body {
+/* =========================================
+   基本リセット
+   ========================================= */
+* {
     margin: 0;
     padding: 0;
-    background-color: #f0f4f7; /* 薄いグレーブルー */
-    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+/* =========================================
+   PC・全体レイアウト（スマホ枠を真ん中に）
+   ========================================= */
+body {
+    margin: 0;
+    background-color: black; /* PC背景は黒 */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
 }
 
-/* スマホ外枠の再現 (w440, H956) */
-body::after {
-    content: "";
-    position: fixed;
+/* スマホ画面の枠 */
+.app-container {
     width: 440px;
     height: 956px;
-    border: 1px solid #ddd;
-    pointer-events: none;
-    z-index: -1;
     background-color: #ffffff;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-/* メインコンテナとしてのbody設定 */
-body {
-    width: 440px;
-    height: 956px;
-    flex-direction: column;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-/* ヘッダーを擬似的に作成 */
-body::before {
+/* =========================================
+   1. ヘッダー「ホーム」（1枚目の写真のサイズ感へ）
+   ========================================= */
+.app-container::before {
     content: "ホーム";
-    display: block;
-    width: calc(100% - 40px);
-    height: 60px;
-    background-color: #3c5d6e; /* 写真の濃いブルー */
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    
+    /* ★ここを修正：160px(巨大) → 75px(スマート) */
+    height: 75px; 
+    
+    background-color: #436475;
     color: white;
-    text-align: center;
-    line-height: 60px;
-    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* 文字サイズも上品に */
+    font-size: 22px;     
     font-weight: bold;
     border-radius: 12px;
-    margin: 20px auto 0;
-    order: -2; /* 一番上に配置 */
+    letter-spacing: 2px;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* 目標設定フォーム (邪魔にならないよう調整) */
+/* =========================================
+   2. 目標入力フォーム（バランスを見て配置）
+   ========================================= */
 #goal-form {
-    order: -1;
-    padding: 10px 20px;
+    position: absolute;
+    
+    /* ヘッダーの下、適切な位置へ */
+    top: 110px; 
+    left: 50%;
+    transform: translateX(-50%);
+    
     display: flex;
-    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 20;
+    
+    /* 拡大をやめて通常サイズへ */
+    transform: scale(1.0);
+    
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 15px;
+    border-radius: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 #goalInput {
-    flex: 1;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    width: 120px;
+    font-size: 14px;
+    text-align: center;
 }
 
 #goal-form button {
-    background-color: #3c5d6e;
+    background: #436475;
     color: white;
     border: none;
-    padding: 5px 15px;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
 }
 
-/* 今日の目標・合計距離のテキスト */
-#goal, #distance {
-    text-align: center;
-    color: #444;
-    font-size: 14px;
-    margin: 5px 0;
-}
-
-#goal { order: 0; }
-#distance { order: 2; font-weight: bold; color: #3c5d6e; }
-
-/* 円グラフのコンテナ調整 */
+/* =========================================
+   3. メインの円グラフ（画面中央に大きく）
+   ========================================= */
 .progress-chart {
-    order: 1;
-    width: 320px !important;  /* 写真に合わせて大きく */
-    height: 320px !important;
-    margin: 40px auto !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    
+    /* ほどよい大きさ（画面幅の80%くらい） */
+    width: 80% !important; 
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+    
+    max-width: 360px !important; 
+    max-height: 360px !important;
+    
+    display: block !important;
+    z-index: 1;
 }
 
-/* 下部ナビゲーション (ul) */
+/* =========================================
+   4. テキスト情報（円の中に配置）
+   ========================================= */
+
+/* 今日の目標 */
+#goal {
+    position: absolute;
+    top: 38%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 18px; 
+    font-weight: bold;
+    color: #666;
+    z-index: 5;
+    margin: 0;
+}
+#goal::before { content: "🚩 "; }
+
+/* 今日の合計距離 */
+#distance {
+    position: absolute;
+    top: 58%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    /* font-size: 40px;  */
+    font-size: 20px; 
+    font-weight: bold;
+    color: #333;
+    z-index: 5;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+#distance::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: #436475;
+    margin: 5px auto 0;
+    border-radius: 2px;
+}
+
+/* =========================================
+   5. フッターナビ（1枚目の写真のサイズ感へ）
+   ========================================= */
 ul {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    width: calc(100% - 40px);
-    background-color: #3c5d6e;
-    margin: 0;
-    padding: 10px 0;
-    list-style: none;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    
+    /* ★ここを修正：180px(巨大) → 100px(スマート) */
+    height: 100px; 
+    
+    background-color: #436475;
+    border-radius: 16px;
     display: flex;
     justify-content: space-around;
-    border-radius: 15px;
-    box-sizing: border-box;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
 }
 
 ul li {
-    text-align: center;
     flex: 1;
+    text-align: center;
 }
 
 ul li a {
     text-decoration: none;
     color: white;
-    font-size: 12px;
+    font-size: 12px; /* アプリらしい文字サイズ */
     font-weight: bold;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
 
-/* アイコンを擬似的に作成 (画像がないため絵文字で代用) */
-ul li a::before {
-    font-size: 24px;
-    display: block;
+/* アイコンサイズも1枚目の写真くらいに */
+ul li a i {
+    font-size: 32px;
+    margin-bottom: 2px;
+}
+/* たたかうアイコンだけ少し大きく */
+.fa-khanda {
+    font-size: 40px !important;
 }
 
-ul li:nth-child(1) a::before { content: "❓"; } /* ミッション */
-ul li:nth-child(2) a::before { content: "⚔️"; } /* たたかう */
-ul li:nth-child(3) a::before { content: "📄"; } /* ログ */
+/* =========================================
+   スマホ実機用のレスポンシブ
+   ========================================= */
+@media screen and (max-width: 440px) {
+    body {
+        background-color: white;
+        display: block;
+    }
+    .app-container {
+        width: 100%;
+        height: 100vh;
+        box-shadow: none;
+    }
+}

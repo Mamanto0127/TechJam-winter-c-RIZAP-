@@ -6,6 +6,7 @@
     <title>進捗</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{% static 'top.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .progress-chart {
             width: 140px;
@@ -17,12 +18,18 @@
 </head>
 
 <body>
-
+<div class="app-container">
 <!-- ===== ナビ ===== -->
-<ul>
+<!-- <ul>
     <li><a href="{% url 'kenkou:mission' %}">ミッション</a></li>
     <li><a href="{% url 'kenkou:battle' %}">たたかう</a></li>
     <li><a href="{% url 'kenkou:logs' %}">ログを見る</a></li>
+</ul> -->
+
+<ul>
+    <li><a href="{% url 'kenkou:mission' %}"><i class="fa-solid fa-circle-question"></i>ミッション</a></li>
+    <li><a href="{% url 'kenkou:battle' %}"><i class="fa-solid fa-khanda"></i>たたかう</a></li>
+    <li><a href="{% url 'kenkou:logs' %}"><i class="fa-solid fa-file-lines"></i>ログ</a></li>
 </ul>
 
 <!-- ===== 目標設定 ===== -->
@@ -51,7 +58,8 @@ const centerTextPlugin = {
         const { ctx, width, height } = chart;
         const text = chart.config.data.centerText || "0%";
         ctx.save();
-        ctx.font = "bold 20px sans-serif";
+        // ctx.font = "bold 20px sans-serif";
+        ctx.font = "bold 40px sans-serif";
         ctx.fillStyle = "#111";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -73,7 +81,8 @@ const progressChart = new Chart(ctx, {
         centerText: "0%"
     },
     options: {
-        cutout: "70%",
+        // cutout: "70%",
+        cutout: "85%",
         plugins: { legend: { display: false } }
     },
     plugins: [centerTextPlugin]
@@ -152,11 +161,10 @@ window.onload = startTracking;
 
 
 
-
 </script>
 
 
-
+</div>
 </body>
 </html>
 
