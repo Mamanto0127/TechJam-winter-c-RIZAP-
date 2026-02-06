@@ -12,6 +12,7 @@ class WalkLog(models.Model):  #歩いた歩数を記録するデータベース�
     
 
 class Enemy(models.Model):   #敵を作るための宣下
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     max_hp = models.IntegerField() #敵のHPを保存
     current_hp = models.IntegerField()
 
@@ -19,3 +20,18 @@ class Mission(models.Model):  #ミッション一覧を保存する宣言
     title = models.CharField(max_length=100) #ミッションのタイトル
     description = models.TextField()  #ミッションの詳しい説明
     reward_damage = models.IntegerField()   #ミッションクリア時に敵へ与えるダメージ量
+
+class AttackStock(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    damage = models.IntegerField(default=0)
+
+class MissionClear(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    mission = models.ForeignKey("Mission", on_delete=models.CASCADE)
+    date = models.DateField()
+
+    class Meta:
+        unique_together = ("user", "mission", "date")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.mission.title} ({self.date})"

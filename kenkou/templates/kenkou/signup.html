@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>新規登録</title>
+</head>
+<body style="font-family:sans-serif; background:#f4f4f4;">
+
+  <div style="
+    width:360px;
+    margin:80px auto;
+    background:white;
+    padding:24px;
+    border-radius:12px;
+  ">
+
+    <h2 style="text-align:center;">新規登録</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button type="submit" style="
+        width:100%;
+        padding:10px;
+        background:#4EA4C8;
+        color:white;
+        border:none;
+        border-radius:8px;
+        font-weight:bold;
+      ">
+        登録する
+      </button>
+    </form>
+
+    <div style="margin-top:16px; text-align:center;">
+      <a href="{% url 'login' %}">
+        ログインに戻る
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>

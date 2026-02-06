@@ -1,6 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mission</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 440px;
+      height: 100px;
+      background-color: #2B5F75;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      z-index: 1000;
+    }
+
+    .bottom-nav li {
+      flex: 1;
+      text-align: center;
+    }
+
+    .bottom-nav a {
+      text-decoration: none;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .bottom-nav i {
+      font-size: 26px;
+      line-height: 1;
+    }
+  </style>
+</head>
+
+<style>
+  /* ===== 下ナビ 完全統一 ===== */
+  .bottom-nav a {
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .bottom-nav i {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  /* たたかうだけ少し大きく */
+  .bottom-nav .fa-khanda {
+    font-size: 40px;
+  }
+</style>
+
+
 <body style="margin:0; background-color:black;">
 
-<div style="
+  <div style="
   width: 440px;
   margin: 0 auto;
   background-color: #ffffff;
@@ -9,8 +79,8 @@
   overflow-x: hidden;
 ">
 
-  <!-- ヘッダー -->
-  <div style="
+    <!-- ヘッダー -->
+    <div style="
     background-color: #2B5F75;
     height: 75px;
     color: #ffffff;
@@ -19,7 +89,7 @@
     border-radius: 0 0 12px 12px;
     position: relative;
   ">
-    <a href="{% url 'kenkou:index' %}" style="
+      <a href="{% url 'kenkou:index' %}" style="
       color: #ffffff;
       text-decoration: none;
       font-weight: bold;
@@ -29,22 +99,22 @@
       top: 50%;
       transform: translateY(-50%);
     ">
-      ← 戻る
-    </a>
-    <div style="
+        ← 戻る
+      </a>
+      <div style="
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 22px;
       ">
-      ミッション
+        ミッション
+      </div>
     </div>
-  </div>
 
-  <!-- タブ -->
-  <div style="display: flex; margin: 16px 20px 0;">
-    <div style="
+    <!-- タブ -->
+    <div style="display: flex; margin: 16px 20px 0;">
+      <div style="
       flex: 1;
       background-color: #4EA4C8;
       color: white;
@@ -53,9 +123,9 @@
       border-radius: 12px 12px 0 0;
       font-weight: bold;
     ">
-      デイリー
-    </div>
-    <div style="
+        デイリー
+      </div>
+      <div style="
       flex: 1;
       background-color: #1f4f63;
       color: white;
@@ -65,154 +135,130 @@
       font-weight: bold;
       margin-left: 6px;
     ">
-      ウィークリー
+        ウィークリー
+      </div>
     </div>
-  </div>
 
-  <!-- ミッション一覧 -->
-  <div style="
+    <!-- ミッション一覧 -->
+    <div style="
     background-color: #4EA4C8;
     margin: 0 20px;
     padding: 16px;
     border-radius: 0 12px 12px 12px;
   ">
-    {% for mission in missions %}
-    <div style="
-    background-color: #5BB0D1;
-    padding: 14px;
-    border-radius: 12px;
-    margin-bottom: 14px;
-  ">
-
-    <!-- タイトル -->
-    <div style="
+      {% for mission in missions %}
+      <div
+        style=" background-color: #5BB0D1; padding: 14px; border-radius: 12px; margin-bottom: 14px; {% if mission.id in cleared_ids %} opacity: 0.45; {% endif %} ">
+        <!-- タイトル -->
+        <div style="
       color: white;
       font-size: 15px;
       font-weight: bold;
       margin-bottom: 6px;
     ">
-      {{ mission.title }}
-    </div>
+          {{ mission.title }}
+        </div>
 
-    <!-- 説明 -->
-    <div style="
+        <!-- 説明 -->
+        <div style="
   color: #eaf6fb;
   font-size: 13px;
   line-height: 1.4;
   margin-bottom: 10px;
   word-break: break-word;
 ">
-  {{ mission.description }}
-</div>
+          {{ mission.description }}
+        </div>
 
-    <!-- プログレスバー -->
-    <div style="
+        <!-- プログレスバー -->
+        <div style="
       width: 100%;
       height: 8px;
       background-color: #3a7f9a;
       border-radius: 4px;
       margin-bottom: 8px;
     ">
-      <div style="
+          <div style="
         width: {{ mission.progress|default:0 }}%;
         height: 100%;
         background-color: #1fc77a;
         border-radius: 4px;
       "></div>
-    </div>
+        </div>
 
-    <!-- ダメージ -->
-    <div style="
+        <!-- ダメージ -->
+        <div style="
       color: white;
       font-size: 12px;
       text-align: right;
       opacity: 0.9;
     ">
-      ダメージ：{{ mission.reward_damage }}
+          ダメージ：{{ mission.reward_damage }}
+        </div>
+
+        {% if mission.id in cleared_ids %}
+        <div style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #2B5F75;
+    pointer-events: none;
+  ">
+          ✔ mission-clear!!
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'kenkou:mission_clear' mission.id %}">
+          {% csrf_token %}
+          <button style="
+    margin-top: 6px;
+    width: 100%;
+    padding: 6px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #3F97BC;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  ">
+            クリア
+          </button>
+        </form>
+
+      </div>
+      {% endfor %}
     </div>
 
+    <ul class="bottom-nav">
+      <li><!--ミッション-->
+        <a href="{% url 'kenkou:mission' %}"><i class="fa-solid fa-circle-question"></i>
+          ミッション
+        </a>
+      </li>
+
+      <li><!--たたかう-->
+        <a href="{% url 'kenkou:battle' %}">
+          <i class="fa-solid fa-khanda"></i>
+          たたかう
+        </a>
+      </li>
+
+      <li><!--ログ-->
+        <a href="{% url 'kenkou:logs' %}">
+          <i class="fa-solid fa-file-lines"></i>
+          ログ
+        </a>
+      </li>
+    </ul>
+
+
   </div>
-    {% endfor %}
-  </div>
-
-  <!-- 下ナビゲーション -->
-<div style="
-position: fixed;
-bottom: 0;
-left: 50%;
-transform: translateX(-50%);
-width: 440px;
-background-color: #2B5F75;
-border-radius: 16px 16px 0 0;
-display: flex;
-justify-content: space-around;
-z-index: 1000;
-height: 100px;
-align-items: center;
-">
-
-<!-- ミッション -->
-<a href="{% url 'kenkou:mission' %}" style="
-  text-decoration: none;
-  color: #2fdc9f;
-  font-size: 12px;
-  text-align: center;
-">
-  <div style="
-    width: 36px;
-    height: 36px;
-    background-color: #2fdc9f;
-    border-radius: 50%;
-    margin: 0 auto 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #2B5F75;
-    font-weight: bold;
-  ">?</div>
-  ミッション
-</a>
-
-<!-- たたかう -->
-<a href="{% url 'kenkou:battle' %}" style="
-  text-decoration: none;
-  color: white;
-  font-size: 12px;
-  text-align: center;
-">
-  <div style="
-    width: 36px;
-    height: 36px;
-    margin: 0 auto 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  ">🤺</div>
-  たたかう
-</a>
-
-<!-- ログ -->
-<a href="{% url 'kenkou:logs' %}" style="
-  text-decoration: none;
-  color: white;
-  font-size: 12px;
-  text-align: center;
-">
-  <div style="
-    width: 36px;
-    height: 36px;
-    margin: 0 auto 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  ">📄</div>
-  ログ
-</a>
-
-</div>
-
-</div>
 
 </body>

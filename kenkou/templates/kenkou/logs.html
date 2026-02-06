@@ -1,1 +1,7 @@
 <h1>ああああああああああああああああああああああああああああ</h1>
+<form method="post" action="{% url 'kenkou:logout' %}">
+  {% csrf_token %}
+  <button type="submit">
+    ログアウト
+  </button>
+</form>

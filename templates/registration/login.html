@@ -1,32 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
 </head>
+
 <body>
 
     <h1>Login</h1>
-<section>
-    {% if form.errors %}
+    <section>
+        {% if form.errors %}
         <p>ユーザー名かパスワードが間違っています。再入力してください。.</p>
-    {% endif %}
-    {% if next %}
-        {% if user.is_authenticated %}
-            <p>このアカウントには、このページへアクセスする権限がありません。続行するには、アクセス権限のあるアカウントでログインしてください。</p>
-        {% else %}
-            <p>このページを表示するにはログインしてください。</p>
         {% endif %}
-    {% endif %}
+        {% if next %}
+        {% if user.is_authenticated %}
+        <p>このアカウントには、このページへアクセスする権限がありません。続行するには、アクセス権限のあるアカウントでログインしてください。</p>
+        {% else %}
+        <p>このページを表示するにはログインしてください。</p>
+        {% endif %}
+        {% endif %}
 
-    <form action='{% url "login" %}' method='post'>
-        {% csrf_token %}
-        <input type='hidden' name='next' value='{{ next }}'/>
-        {{ form.as_p }}
-        <button type='submit'>Login</button>
-    </form>
-</section>
-    
+        <form action='{% url "login" %}' method='post'>
+            {% csrf_token %}
+            <input type='hidden' name='next' value='{{ next }}' />
+            {{ form.as_p }}
+            <button type='submit'>Login</button>
+        </form>
+
+        <div style="margin-top:16px; text-align:center;">
+            <a href="{% url 'kenkou:signup' %}" style="
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:8px;
+    background:#eaf6fb;
+    color:#2B5F75;
+    font-weight:bold;
+    text-decoration:none;
+  ">
+                新規登録はこちら
+            </a>
+        </div>
+
+        <a href="{% url 'kenkou:index' %}">ホーム</a>
+
+    </section>
+
 </body>
+
 </html>

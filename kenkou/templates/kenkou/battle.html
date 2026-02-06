@@ -20,5 +20,7 @@
 </form>
 
 {% if damage %}
-<p>与えたダメージ：{{ damage }}</p>
+<p>ミッションダメージ：{{ stored_damage }}</p>
+<p>歩行ダメージ：{{ distance_damage }}</p>
+<p><strong>合計ダメージ：{{ total_damage }}</strong></p>
 {% endif %}

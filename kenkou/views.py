@@ -9,8 +9,54 @@ from datetime import datetime
 from .services.battle import calculate_damage, attack_enemy
 from .services.mission import get_today_missions
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.http import require_POST
+from .models import WalkLog, Enemy, Mission, MissionClear, AttackStock
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
+@login_required
+def battle_view(request):
+    today = date.today()
+
+    walklog, _ = WalkLog.objects.get_or_create(
+        user=request.user,
+        date=today,
+        defaults={"steps": 0, "distance": 0}
+    )
+
+    # ✅ ユーザーごとの敵
+    enemy, _ = Enemy.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "max_hp": 100,
+            "current_hp": 100,
+        }
+    )
+
+    stock, _ = AttackStock.objects.get_or_create(user=request.user)
+
+    damage = 0
+
+    if request.method == "POST":
+        distance_damage = int(walklog.distance // 100)
+        mission_damage = stock.damage
+
+        damage = distance_damage + mission_damage
+
+        enemy.current_hp = max(enemy.current_hp - damage, 0)
+        enemy.save()
+
+        stock.damage = 0
+        stock.save()
+
+    hp_percent = int(enemy.current_hp / enemy.max_hp * 100)
+
+    return render(request, "kenkou/battle.html", {
+        "damage": damage,
+        "enemy": enemy,
+        "hp_percent": hp_percent,
+    })
 
 @csrf_exempt
 def location_receive(request):
@@ -89,47 +135,54 @@ def index(request):
 
 def mission_view(request):
     missions = get_today_missions(count=3)
-    return render(request, "kenkou/mission.html", {"missions": missions})
-
-@login_required
-def battle_view(request):
     today = date.today()
 
-    if not request.user.is_authenticated:
-        return redirect("login")
-    
-    #ユーザのログ取得
-    walklog, created = WalkLog.objects.get_or_create(
-        user=request.user,
-        date=today,
-        defaults={"steps": 0, "distance": 0}
-    )    
+    cleared_ids = []
+    if request.user.is_authenticated:
+        cleared_ids = MissionClear.objects.filter(
+            user=request.user,
+            date=today
+        ).values_list("mission_id", flat=True)
 
-    #敵
-    enemy, created = Enemy.objects.get_or_create(
-        id=1, 
-        defaults={"max_hp": 100, "current_hp": 100}
-    )
-
-    damage = 0
-    if request.method == "POST":
-        distance_damage = int (walklog.distance / 100)   #100メートルにつき1ダメージ
-
-        mission_damage = request.session.get("mission_damage", 0) #ミッションクリアでダメージ
-
-        damage = distance_damage + mission_damage
-
-        enemy.current_hp = max(enemy.current_hp - damage, 0) #攻撃
-        enemy.save()
-
-        request.session["mission_damage"] = 0
-
-    hp_percent = int(enemy.current_hp / enemy.max_hp * 100)
-
-    return render(request, "kenkou/battle.html", {
-        "damage": damage, 
-        "enemy": enemy, 
-        "hp_percent": hp_percent})
+    return render(request, "kenkou/mission.html", {
+        "missions": missions,
+        "cleared_ids": cleared_ids,
+    })
 
 def logs_view(request):
     return render(request, "kenkou/logs.html")
+
+@login_required
+def mission_clear(request, mission_id):
+    if request.method != "POST":
+        return redirect("kenkou:mission")
+
+    mission = get_object_or_404(Mission, id=mission_id)
+    today = date.today()
+
+    # すでにクリア済みかチェック
+    cleared, created = MissionClear.objects.get_or_create(
+        user=request.user,
+        mission=mission,
+        date=today
+    )
+
+    # 🔥 初回クリア時のみダメージ加算
+    if created:
+        stock, _ = AttackStock.objects.get_or_create(user=request.user)
+        stock.damage += mission.reward_damage
+        stock.save()
+
+    return redirect("kenkou:mission")
+
+def signup_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # ★ 作成後そのままログイン
+            return redirect("kenkou:index")
+    else:
+        form = UserCreationForm()
+
+    return render(request, "kenkou/signup.html", {"form": form})
