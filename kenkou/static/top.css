@@ -43,7 +43,7 @@ body {
     /* ★ここを修正：160px(巨大) → 75px(スマート) */
     height: 75px; 
     
-    background-color: #436475;
+    background-color: #2B5F75;
     color: white;
     display: flex;
     justify-content: center;
@@ -165,7 +165,7 @@ body {
     display: block;
     width: 80px;
     height: 4px;
-    background-color: #436475;
+    background-color: #2B5F75;
     margin: 5px auto 0;
     border-radius: 2px;
 }
@@ -183,7 +183,7 @@ ul {
     /* ★ここを修正：180px(巨大) → 100px(スマート) */
     height: 100px; 
     
-    background-color: #436475;
+    background-color: #2B5F75;
     border-radius: 16px 16px 0 0;
     display: flex;
     justify-content: space-around;

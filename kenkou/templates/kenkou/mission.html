@@ -14,21 +14,32 @@
     background-color: #2B5F75;
     height: 75px;
     color: #ffffff;
-    padding: 14px;
-    text-align: center;
     font-size: 18px;
     font-weight: bold;
     border-radius: 0 0 12px 12px;
+    position: relative;
   ">
     <a href="{% url 'kenkou:index' %}" style="
       color: #ffffff;
       text-decoration: none;
       font-weight: bold;
+      position: absolute;
       float: left;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
     ">
       ← 戻る
     </a>
-    ミッション
+    <div style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+      ">
+      ミッション
+    </div>
   </div>
 
   <!-- タブ -->
@@ -133,7 +144,6 @@ transform: translateX(-50%);
 width: 440px;
 background-color: #2B5F75;
 border-radius: 16px 16px 0 0;
-padding: 10px 0;
 display: flex;
 justify-content: space-around;
 z-index: 1000;
