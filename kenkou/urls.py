@@ -13,6 +13,5 @@ urlpatterns = [
   path("set_goal/", views.set_goal_distance, name="set_goal"),
   path("logs/", views.logs_view, name="logs"),
   path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-  path("mission/clear/<int:mission_id>/", views.mission_clear, name="mission_clear"),
   path("signup/", views.signup_view, name="signup"),
 ]

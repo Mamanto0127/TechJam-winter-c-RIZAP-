@@ -20,6 +20,15 @@ class Mission(models.Model):  #ミッション一覧を保存する宣言
     title = models.CharField(max_length=100) #ミッションのタイトル
     description = models.TextField()  #ミッションの詳しい説明
     reward_damage = models.IntegerField()   #ミッションクリア時に敵へ与えるダメージ量
+    progress = models.IntegerField(default=0)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    def __str__(self):
+        return self.title
+
+class UserMission(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
+    cleared = models.BooleanField(default=False)
 
 class AttackStock(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

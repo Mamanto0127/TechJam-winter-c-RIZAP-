@@ -11,7 +11,7 @@ from .services.mission import get_today_missions
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import WalkLog, Enemy, Mission, MissionClear, AttackStock
+from .models import WalkLog, Enemy, Mission, MissionClear, AttackStock, UserMission
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
@@ -134,20 +134,15 @@ def index(request):
     )
 
 def mission_view(request):
-    missions = get_today_missions(count=3)
-    today = date.today()
+    missions = Mission.objects.all()[:3]     # ユーザーのクリア状態を取得
+    user_missions = UserMission.objects.filter(user=request.user)
+    cleared_ids = [um.mission.id for um in user_missions if um.cleared]
 
-    cleared_ids = []
-    if request.user.is_authenticated:
-        cleared_ids = MissionClear.objects.filter(
-            user=request.user,
-            date=today
-        ).values_list("mission_id", flat=True)
-
-    return render(request, "kenkou/mission.html", {
-        "missions": missions,
-        "cleared_ids": cleared_ids,
-    })
+    context = {
+        'missions': missions,
+        'cleared_ids': cleared_ids,
+    }
+    return render(request, 'kenkou/mission.html', context)
 
 def logs_view(request):
     return render(request, "kenkou/logs.html")
@@ -160,18 +155,25 @@ def mission_clear(request, mission_id):
     mission = get_object_or_404(Mission, id=mission_id)
     today = date.today()
 
-    # すでにクリア済みかチェック
+    # MissionClear に記録
     cleared, created = MissionClear.objects.get_or_create(
         user=request.user,
         mission=mission,
         date=today
     )
 
-    # 🔥 初回クリア時のみダメージ加算
     if created:
         stock, _ = AttackStock.objects.get_or_create(user=request.user)
         stock.damage += mission.reward_damage
         stock.save()
+
+    # 🔹 UserMission を更新
+    user_mission, _ = UserMission.objects.get_or_create(
+        user=request.user,
+        mission=mission
+    )
+    user_mission.cleared = True
+    user_mission.save()
 
     return redirect("kenkou:mission")
 

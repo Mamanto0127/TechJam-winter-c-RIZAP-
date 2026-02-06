@@ -148,90 +148,54 @@
   ">
       {% for mission in missions %}
       <div
-        style=" background-color: #5BB0D1; padding: 14px; border-radius: 12px; margin-bottom: 14px; {% if mission.id in cleared_ids %} opacity: 0.45; {% endif %} ">
-        <!-- タイトル -->
-        <div style="
-      color: white;
-      font-size: 15px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    ">
-          {{ mission.title }}
-        </div>
-
-        <!-- 説明 -->
-        <div style="
-  color: #eaf6fb;
-  font-size: 13px;
-  line-height: 1.4;
-  margin-bottom: 10px;
-  word-break: break-word;
-">
-          {{ mission.description }}
-        </div>
-
-        <!-- プログレスバー -->
-        <div style="
-      width: 100%;
-      height: 8px;
-      background-color: #3a7f9a;
-      border-radius: 4px;
-      margin-bottom: 8px;
-    ">
-          <div style="
-        width: {{ mission.progress|default:0 }}%;
-        height: 100%;
-        background-color: #1fc77a;
-        border-radius: 4px;
-      "></div>
-        </div>
-
-        <!-- ダメージ -->
-        <div style="
-      color: white;
-      font-size: 12px;
-      text-align: right;
-      opacity: 0.9;
-    ">
-          ダメージ：{{ mission.reward_damage }}
-        </div>
+        style="position: relative; background-color: #5BB0D1; padding: 14px; border-radius: 12px; margin-bottom: 14px; {% if mission.id in cleared_ids %} opacity: 0.45; {% endif %}">
 
         {% if mission.id in cleared_ids %}
+        <!-- 上に出るラベルだけ残す -->
         <div style="
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     background-color: rgba(255, 255, 255, 0.85);
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 4px 10px;
+    border-radius: 12px;
     font-size: 12px;
     font-weight: bold;
     color: #2B5F75;
-    pointer-events: none;
+    display: inline-block;
+    margin-bottom: 8px;
   ">
           ✔ mission-clear!!
         </div>
         {% endif %}
 
+        <!-- タイトル -->
+        <div style="color: white; font-size: 15px; font-weight: bold; margin-bottom: 6px;">
+          {{ mission.title }}
+        </div>
+
+        <!-- 説明 -->
+        <div style="color: #eaf6fb; font-size: 13px; line-height: 1.4; margin-bottom: 10px; word-break: break-word;">
+          {{ mission.description }}
+        </div>
+
+        <!-- プログレスバー -->
+        <div style="width: 100%; height: 8px; background-color: #3a7f9a; border-radius: 4px; margin-bottom: 8px;">
+          <div
+            style="width: {{ mission.progress|default:0 }}%; height: 100%; background-color: #1fc77a; border-radius: 4px;">
+          </div>
+        </div>
+
+        <!-- ダメージ -->
+        <div style="color: white; font-size: 12px; text-align: right; opacity: 0.9;">
+          ダメージ：{{ mission.reward_damage }}
+        </div>
+
+        <!-- クリアボタン -->
         <form method="post" action="{% url 'kenkou:mission_clear' mission.id %}">
           {% csrf_token %}
-          <button style="
-    margin-top: 6px;
-    width: 100%;
-    padding: 6px 0;
-    border: none;
-    border-radius: 6px;
-    background-color: #3F97BC;
-    color: white;
-    font-size: 13px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-  ">
+          <button
+            style="margin-top: 6px; width: 100%; padding: 6px 0; border: none; border-radius: 6px; background-color: #3F97BC; color: white; font-size: 13px; font-weight: bold; letter-spacing: 0.5px;">
             クリア
           </button>
         </form>
-
       </div>
       {% endfor %}
     </div>
