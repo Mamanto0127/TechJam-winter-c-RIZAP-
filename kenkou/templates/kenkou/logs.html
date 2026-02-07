@@ -1,7 +1,172 @@
-<h1>ああああああああああああああああああああああああああああ</h1>
-<form method="post" action="{% url 'kenkou:logout' %}">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログ</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body style="margin:0; background-color:black;">
+
+<div style="
+  width: 440px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: sans-serif;
+  position: relative;
+  overflow-x: hidden;
+">
+
+  <!-- ===== ヘッダー ===== -->
+  <div style="
+    background-color: #2B5F75;
+    height: 75px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 0 0 12px 12px;
+    position: relative;
+  ">
+    <a href="{% url 'kenkou:index' %}" style="
+      color: #ffffff;
+      text-decoration: none;
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: bold;
+    ">
+      ← 戻る
+    </a>
+
+    <div style="
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 22px;
+    ">
+      ログ
+    </div>
+  </div>
+
+  <!-- ===== コンテンツ ===== -->
+  <div style="padding: 24px 20px 140px;">
+
+    <h2 style="margin-bottom: 16px;">ログ</h2>
+
+    {% if logs %}
+      {% for log in logs %}
+      <div style="
+        background-color: #f2f7f9;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+      ">
+        <div style="font-weight:bold; color:#2B5F75;">
+          {{ log.created_at|date:"m/d H:i" }}
+        </div>
+        <div style="margin-top:6px; font-size:14px;">
+          歩行距離：{{ log.distance }} m
+        </div>
+        <div style="font-size:13px; color:#666;">
+          ダメージ：{{ log.damage }}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:#888;">まだログがありません</p>
+    {% endif %}
+
+  </div>
+
+  <!-- ===== ログアウト ===== -->
+<form method="post" action="{% url 'logout' %}" style="margin-top: 32px;">
   {% csrf_token %}
-  <button type="submit">
+  <button type="submit" style="
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #d9534f;
+    background-color: #ffffff;
+    color: #d9534f;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+  ">
     ログアウト
   </button>
 </form>
+
+
+  <!-- ===== 下ナビ ===== -->
+  <ul style="
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 440px;
+    height: 100px;
+    background-color: #2B5F75;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 1000;
+  ">
+    <li style="flex:1; text-align:center;">
+      <a href="{% url 'kenkou:mission' %}" style="
+        color:white;
+        text-decoration:none;
+        font-size:12px;
+        font-weight:bold;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:4px;
+      ">
+        <i class="fa-solid fa-circle-question" style="font-size:32px;"></i>
+        ミッション
+      </a>
+    </li>
+
+    <li style="flex:1; text-align:center;">
+      <a href="{% url 'kenkou:battle' %}" style="
+        color:white;
+        text-decoration:none;
+        font-size:12px;
+        font-weight:bold;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:4px;
+      ">
+        <i class="fa-solid fa-khanda" style="font-size:40px;"></i>
+        たたかう
+      </a>
+    </li>
+
+    <li style="flex:1; text-align:center;">
+      <a href="{% url 'kenkou:logs' %}" style="
+        color:white;
+        text-decoration:none;
+        font-size:12px;
+        font-weight:bold;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:4px;
+      ">
+        <i class="fa-solid fa-file-lines" style="font-size:32px;"></i>
+        ログ
+      </a>
+    </li>
+  </ul>
+
+</div>
+
+</body>
+</html>
