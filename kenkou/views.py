@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from datetime import date
-from .models import WalkLog, Enemy
+from .models import WalkLog
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
@@ -11,9 +11,12 @@ from .services.mission import get_today_missions
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import WalkLog, Enemy, Mission, MissionClear, AttackStock, UserMission
+from .models import WalkLog, Mission, MissionClear, AttackStock, UserMission
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from .models import EnemyMaster, UserEnemy
+import random
+
 
 @login_required
 def battle_view(request):
@@ -25,38 +28,56 @@ def battle_view(request):
         defaults={"steps": 0, "distance": 0}
     )
 
-    # ✅ ユーザーごとの敵
-    enemy, _ = Enemy.objects.get_or_create(
-        user=request.user,
-        defaults={
-            "max_hp": 100,
-            "current_hp": 100,
-        }
-    )
+    # 🔵 今の敵 or 初期敵
+    user_enemy = UserEnemy.objects.filter(user=request.user).first()
+
+    if not user_enemy:
+        enemy_qs = EnemyMaster.objects.all()
+        if not enemy_qs.exists():
+            return HttpResponse("EnemyMaster が未登録です（adminで追加してください）")
+        enemy_master = random.choice(enemy_qs)
+
+        user_enemy = UserEnemy.objects.create(
+            user=request.user,
+            enemy=enemy_master,
+            current_hp=enemy_master.max_hp
+        )
 
     stock, _ = AttackStock.objects.get_or_create(user=request.user)
-
     damage = 0
 
     if request.method == "POST":
         distance_damage = int(walklog.distance // 100)
         mission_damage = stock.damage
-
         damage = distance_damage + mission_damage
 
-        enemy.current_hp = max(enemy.current_hp - damage, 0)
-        enemy.save()
+        user_enemy.current_hp -= damage
 
+        # 💀 倒した？
+        if user_enemy.current_hp <= 0:
+            next_enemy = random.choice(EnemyMaster.objects.all())
+            user_enemy.enemy = next_enemy
+            user_enemy.current_hp = next_enemy.max_hp
+            user_enemy.enemy = next_enemy
+            user_enemy.current_hp = next_enemy.max_hp
+        else:
+            user_enemy.current_hp = 0  # 全クリ
+
+        user_enemy.save()
         stock.damage = 0
         stock.save()
 
-    hp_percent = int(enemy.current_hp / enemy.max_hp * 100)
+    hp_percent = int(
+        user_enemy.current_hp / user_enemy.enemy.max_hp * 100
+    )
 
     return render(request, "kenkou/battle.html", {
-        "damage": damage,
-        "enemy": enemy,
+        "enemy": user_enemy.enemy,
+        "current_hp": user_enemy.current_hp,
         "hp_percent": hp_percent,
+        "damage": damage,
     })
+
 
 @csrf_exempt
 def location_receive(request):
@@ -86,6 +107,7 @@ def location_receive(request):
 
     return JsonResponse({"status": "error"}, status=400)
 
+
 def set_goal_distance(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -100,6 +122,7 @@ def set_goal_distance(request):
         return JsonResponse({"status": "ok", "goal": goal})
 
     return JsonResponse({"status": "error"}, status=400)
+
 
 def index(request):
     today = date.today()
@@ -133,6 +156,7 @@ def index(request):
         }
     )
 
+
 def mission_view(request):
     missions = Mission.objects.all()[:3]     # ユーザーのクリア状態を取得
     user_missions = UserMission.objects.filter(user=request.user)
@@ -144,8 +168,10 @@ def mission_view(request):
     }
     return render(request, 'kenkou/mission.html', context)
 
+
 def logs_view(request):
     return render(request, "kenkou/logs.html")
+
 
 @login_required
 def mission_clear(request, mission_id):
@@ -176,6 +202,7 @@ def mission_clear(request, mission_id):
     user_mission.save()
 
     return redirect("kenkou:mission")
+
 
 def signup_view(request):
     if request.method == "POST":

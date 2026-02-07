@@ -9,12 +9,6 @@ class WalkLog(models.Model):  #歩いた歩数を記録するデータベース�
 
     class Meta:
         unique_together = ("user", "date")
-    
-
-class Enemy(models.Model):   #敵を作るための宣下
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    max_hp = models.IntegerField() #敵のHPを保存
-    current_hp = models.IntegerField()
 
 class Mission(models.Model):  #ミッション一覧を保存する宣言
     title = models.CharField(max_length=100) #ミッションのタイトル
@@ -44,3 +38,16 @@ class MissionClear(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.mission.title} ({self.date})"
+    
+class EnemyMaster(models.Model):
+    name = models.CharField(max_length=50)
+    max_hp = models.IntegerField()
+
+
+    def __str__(self):
+        return self.name
+
+class UserEnemy(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    enemy = models.ForeignKey(EnemyMaster, on_delete=models.CASCADE)
+    current_hp = models.IntegerField()
