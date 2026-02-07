@@ -19,22 +19,31 @@ import random
 
 
 @login_required
+@login_required
 def battle_view(request):
     today = date.today()
 
+    # ===== 初期化（GETでも必ず存在させる）=====
+    distance_damage = 0
+    mission_damage = 0
+    total_damage = 0
+    damage = 0
+
+    # ===== 今日の歩行ログ =====
     walklog, _ = WalkLog.objects.get_or_create(
         user=request.user,
         date=today,
         defaults={"steps": 0, "distance": 0}
     )
 
-    # 🔵 今の敵 or 初期敵
+    # ===== 今戦っている敵 =====
     user_enemy = UserEnemy.objects.filter(user=request.user).first()
 
     if not user_enemy:
         enemy_qs = EnemyMaster.objects.all()
         if not enemy_qs.exists():
             return HttpResponse("EnemyMaster が未登録です（adminで追加してください）")
+
         enemy_master = random.choice(enemy_qs)
 
         user_enemy = UserEnemy.objects.create(
@@ -43,30 +52,31 @@ def battle_view(request):
             current_hp=enemy_master.max_hp
         )
 
+    # ===== 攻撃ストック =====
     stock, _ = AttackStock.objects.get_or_create(user=request.user)
-    damage = 0
 
+    # ===== 攻撃処理 =====
     if request.method == "POST":
         distance_damage = int(walklog.distance // 100)
         mission_damage = stock.damage
-        damage = distance_damage + mission_damage
+        total_damage = distance_damage + mission_damage
+        damage = total_damage
 
-        user_enemy.current_hp -= damage
+        user_enemy.current_hp -= total_damage
 
-        # 💀 倒した？
+        # 💀 撃破した場合
         if user_enemy.current_hp <= 0:
             next_enemy = random.choice(EnemyMaster.objects.all())
             user_enemy.enemy = next_enemy
             user_enemy.current_hp = next_enemy.max_hp
-            user_enemy.enemy = next_enemy
-            user_enemy.current_hp = next_enemy.max_hp
-        else:
-            user_enemy.current_hp = 0  # 全クリ
 
         user_enemy.save()
+
+        # 攻撃ストック消費
         stock.damage = 0
         stock.save()
 
+    # ===== HP 割合 =====
     hp_percent = int(
         user_enemy.current_hp / user_enemy.enemy.max_hp * 100
     )
@@ -77,6 +87,9 @@ def battle_view(request):
         "current_hp": user_enemy.current_hp,
         "hp_percent": hp_percent,
         "damage": damage,
+        "distance_damage": distance_damage,
+        "stored_damage": mission_damage,
+        "total_damage": total_damage,
     })
 
 

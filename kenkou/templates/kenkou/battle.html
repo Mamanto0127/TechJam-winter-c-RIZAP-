@@ -1,181 +1,243 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>たたかう</title>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ===== 敵ふわふわ ===== */
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-14px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== 下ナビ ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 440px;
+      height: 100px;
+      background-color: #2B5F75;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      z-index: 1000;
+    }
+
+    .bottom-nav li {
+      flex: 1;
+      text-align: center;
+    }
+
+    .bottom-nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bottom-nav i {
+      font-size: 32px;
+    }
+
+    .bottom-nav .fa-khanda {
+      font-size: 40px;
+    }
+  </style>
 </head>
 
-<body style="margin:0; background-color:black;">
+<body style="margin:0; background:#000;">
 
+  <!-- ===== 画面全体（背景なし） ===== -->
   <div style="
-  width: 440px;
-  margin: 0 auto;
-  background-color: #ffffff;
-  min-height: 100vh;
-  font-family: sans-serif;
-  position: relative;
-  overflow-x: hidden;
-">
+    width: 440px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    font-family: sans-serif;
+    overflow-x: hidden;
+    background-color: #111;
+  ">
 
     <!-- ===== ヘッダー ===== -->
     <div style="
-    background-color: #2B5F75;
-    height: 75px;
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 0 0 12px 12px;
-    position: relative;
-  ">
-      <a href="{% url 'kenkou:index' %}" style="
-      color: #ffffff;
-      text-decoration: none;
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
+      background-color: rgba(43,95,117,0.9);
+      height: 75px;
+      color: white;
       font-weight: bold;
+      border-radius: 0 0 12px 12px;
+      position: relative;
+      z-index: 10;
     ">
-        ← 戻る
+      <a href="{% url 'kenkou:index' %}" style="
+        color: white;
+        text-decoration: none;
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+      ">
+        ←
       </a>
 
       <div style="
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 22px;
-    ">
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 22px;
+      ">
         たたかう
       </div>
     </div>
 
-    <!-- ===== コンテンツ ===== -->
-    <div style="padding: 24px 20px 140px;">
-
-      <h2 style="margin-bottom: 12px;">敵が現れた！</h2>
-
-      <h3>{{enemy.name}}</h3>
-
-      <p style="margin-bottom: 8px;">
-        敵HP：{{ user_enemy.current_hp }} / {{ enemy.max_hp }}
-      </p>
-
-      <!-- HPバー -->
-      <div style="
-      width: 100%;
-      background: #ddd;
-      border-radius: 10px;
-      margin-bottom: 16px;
+    <!-- ===== 敵表示エリア（ふわふわするキャラはここ） ===== -->
+    <div style="
+      text-align: center;
+      margin-top: 90px;
+      color: white;
+      position: relative;
+      z-index: 5;
     ">
-        <div style="
-        width: {{ hp_percent }}%;
-        height: 20px;
-        background: linear-gradient(to right, #ff4d4d, #ff0000);
-        border-radius: 10px;
-        transition: width 0.5s;
+
+      <!-- 敵名 -->
+      <div style="
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 24px;
       ">
-        </div>
+        Lv.{{ enemy.level }} {{ enemy.name }}
       </div>
 
-      <!-- 戦闘ボタン -->
+      <!-- ★ ふわふわするキャラクター画像 ★ -->
+      <div style="height: 200px;">
+        {% if enemy.image %}
+        <img src="{{ enemy.image.url }}" alt="enemy" style="
+              width: 180px;
+              animation: float 2.5s ease-in-out infinite;
+            ">
+        {% else %}
+        <div style="color:red;">※ enemy に画像が設定されていません</div>
+        {% endif %}
+
+        <!-- ===== HPバー ===== -->
+        <div style="
+  width: 260px;
+  margin: 16px auto 0;
+  background: rgba(0,0,0,0.5);
+  border-radius: 10px;
+  padding: 4px;
+">
+          <div style="
+    width: {{ hp_percent }}%;
+    height: 14px;
+    background: linear-gradient(90deg, #ff4d4d, #ff9f43);
+    border-radius: 8px;
+    transition: width 0.3s ease;
+  "></div>
+        </div>
+
+        <div style="
+  margin-top: 6px;
+  font-size: 12px;
+  text-align: center;
+  color: white;
+">
+          HP {{ current_hp }} / {{ enemy.max_hp }}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== 操作エリア（たたかうバーは残す） ===== -->
+    <div style="
+      margin: 60px 40px 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+      position: relative;
+    ">
+
       <form method="post">
         {% csrf_token %}
         <button type="submit" style="
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        background-color: #ff4d4d;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-      ">
+          width: 100%;
+          padding: 14px;
+          border-radius: 14px;
+          border: none;
+          background-color: #5AA6C8;
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
+        ">
           たたかう
         </button>
       </form>
 
-      {% if damage %}
-      <div style="margin-top: 16px;">
+      {% if damage > 0 %}
+      <div style="
+        background: rgba(0,0,0,0.55);
+        border-radius: 12px;
+        padding: 12px;
+        color: white;
+        font-size: 13px;
+      ">
         <p>ミッションダメージ：{{ stored_damage }}</p>
         <p>歩行ダメージ：{{ distance_damage }}</p>
         <p><strong>合計ダメージ：{{ total_damage }}</strong></p>
       </div>
-
       {% endif %}
     </div>
 
     <!-- ===== 下ナビ ===== -->
-    <ul style="
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 440px;
-    height: 100px;
-    background-color: #2B5F75;
-    border-radius: 16px 16px 0 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    z-index: 1000;
-  ">
-      <li style="flex:1; text-align:center;">
-        <a href="{% url 'kenkou:mission' %}" style="
-        color:white;
-        text-decoration:none;
-        font-size:12px;
-        font-weight:bold;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:4px;
-      ">
-          <i class="fa-solid fa-circle-question" style="font-size:32px;"></i>
+    <ul class="bottom-nav">
+      <li>
+        <a href="{% url 'kenkou:mission' %}">
+          <i class="fa-solid fa-circle-question"></i>
           ミッション
         </a>
       </li>
-
-      <li style="flex:1; text-align:center;">
-        <a href="{% url 'kenkou:battle' %}" style="
-        color:white;
-        text-decoration:none;
-        font-size:12px;
-        font-weight:bold;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:4px;
-      ">
-          <i class="fa-solid fa-khanda" style="font-size:40px;"></i>
+      <li>
+        <a href="{% url 'kenkou:battle' %}">
+          <i class="fa-solid fa-khanda"></i>
           たたかう
         </a>
       </li>
-
-      <li style="flex:1; text-align:center;">
-        <a href="{% url 'kenkou:logs' %}" style="
-        color:white;
-        text-decoration:none;
-        font-size:12px;
-        font-weight:bold;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:4px;
-      ">
-          <i class="fa-solid fa-file-lines" style="font-size:32px;"></i>
+      <li>
+        <a href="{% url 'kenkou:logs' %}">
+          <i class="fa-solid fa-file-lines"></i>
           ログ
         </a>
       </li>
     </ul>
 
   </div>
-
 </body>
 
 </html>
