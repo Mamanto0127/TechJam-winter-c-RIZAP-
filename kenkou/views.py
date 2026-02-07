@@ -72,6 +72,7 @@ def battle_view(request):
     )
 
     return render(request, "kenkou/battle.html", {
+        "user_enemy": user_enemy,
         "enemy": user_enemy.enemy,
         "current_hp": user_enemy.current_hp,
         "hp_percent": hp_percent,
