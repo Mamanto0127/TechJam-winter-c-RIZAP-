@@ -20,12 +20,6 @@
 <body>
 <div class="app-container">
 <!-- ===== ナビ ===== -->
-<!-- <ul>
-    <li><a href="{% url 'kenkou:mission' %}">ミッション</a></li>
-    <li><a href="{% url 'kenkou:battle' %}">たたかう</a></li>
-    <li><a href="{% url 'kenkou:logs' %}">ログを見る</a></li>
-</ul> -->
-
 <ul>
     <li><a href="{% url 'kenkou:mission' %}"><i class="fa-solid fa-circle-question"></i>ミッション</a></li>
     <li><a href="{% url 'kenkou:battle' %}"><i class="fa-solid fa-khanda"></i>たたかう</a></li>
@@ -46,19 +40,21 @@
 
 <script>
 let lastLat = null;
-let lastLon = null;
 
-let totalDistance = {{ total_distance }};
-let goalDistance = {{ goal_distance }};
+// Djangoからの初期値
+let totalDistance = parseFloat({{ total_distance|default:0 }});
+let goalDistance = parseFloat({{ goal_distance|default:1000 }});
 
-/* ===== 中央テキストプラグイン ===== */
+// ===== CSRFトークン =====
+const csrftoken = '{{ csrf_token }}';
+
+// ===== 中央テキストプラグイン =====
 const centerTextPlugin = {
     id: "centerText",
     beforeDraw(chart) {
         const { ctx, width, height } = chart;
         const text = chart.config.data.centerText || "0%";
         ctx.save();
-        // ctx.font = "bold 20px sans-serif";
         ctx.font = "bold 40px sans-serif";
         ctx.fillStyle = "#111";
         ctx.textAlign = "center";
@@ -68,27 +64,26 @@ const centerTextPlugin = {
     }
 };
 
-/* ===== Chart 初期化（1回だけ） ===== */
+// ===== Chart 初期化 =====
 const ctx = document.getElementById("progressChart").getContext("2d");
 const progressChart = new Chart(ctx, {
     type: "doughnut",
     data: {
         datasets: [{
-            data: [0, goalDistance],
+            data: [totalDistance, Math.max(goalDistance - totalDistance, 0)],
             backgroundColor: ["#4ade80", "#e5e7eb"],
             borderWidth: 0
         }],
-        centerText: "0%"
+        centerText: `${((totalDistance/goalDistance)*100).toFixed(1)}%`
     },
     options: {
-        // cutout: "70%",
         cutout: "85%",
         plugins: { legend: { display: false } }
     },
     plugins: [centerTextPlugin]
 });
 
-/* ===== 進捗更新 ===== */
+// ===== グラフ更新 =====
 function updateProgress() {
     const achieved = Math.min(totalDistance, goalDistance);
     const remaining = Math.max(goalDistance - achieved, 0);
@@ -104,7 +99,22 @@ function updateProgress() {
         `今日の合計距離：${totalDistance.toFixed(2)} m`;
 }
 
-/* ===== 距離計算 ===== */
+// ===== サーバーに距離送信 =====
+function sendDistanceToServer(distance) {
+    fetch("{% url 'kenkou:location_receive' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({ distance: distance })
+    })
+    .then(res => res.json())
+    .then(data => console.log("distance saved:", data.total_distance))
+    .catch(err => console.error(err));
+}
+
+// ===== 距離計算 =====
 function haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const toRad = x => x * Math.PI / 180;
@@ -118,9 +128,14 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/* ===== GPS ===== */
+// ===== GPS追跡 =====
+let watchId = null;
 function startTracking() {
-    navigator.geolocation.watchPosition(pos => {
+    if (!navigator.geolocation) return alert("GPSが利用できません");
+
+    if (watchId !== null) return; // 二重起動防止
+
+    watchId = navigator.geolocation.watchPosition(pos => {
         const { latitude, longitude, accuracy } = pos.coords;
         if (accuracy > 80) return;
 
@@ -131,17 +146,18 @@ function startTracking() {
         }
 
         const dist = haversineDistance(lastLat, lastLon, latitude, longitude);
-        if (dist < 1) return;
+        if (dist < 1 || dist > 50) return; // 微小距離 or ワープ防止
 
         totalDistance += dist;
         lastLat = latitude;
         lastLon = longitude;
 
         updateProgress();
-    });
+        sendDistanceToServer(totalDistance);
+    }, err => console.error(err), { enableHighAccuracy: true, maximumAge: 1000 });
 }
 
-/* ===== 目標設定 ===== */
+// ===== 目標設定 =====
 document.getElementById("goal-form").addEventListener("submit", e => {
     e.preventDefault();
     const val = Number(document.getElementById("goalInput").value);
@@ -150,25 +166,25 @@ document.getElementById("goal-form").addEventListener("submit", e => {
     goalDistance = val;
     document.getElementById("goal").textContent =
         `今日の目標：${goalDistance} m`;
-
     updateProgress();
+
+    fetch("{% url 'kenkou:set_goal' %}", {   // ← URL名を 'set_goal' に修正
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({ goal: val })
+    })
+    .then(res => res.json())
+    .then(data => console.log("goal updated", data))
+    .catch(err => console.error(err));
 });
 
-/* 初期化 */
+// ===== 初期化 =====
 updateProgress();
 window.onload = startTracking;
-
-
-
-
 </script>
-
-
 </div>
 </body>
 </html>
-
-
-
-
-
